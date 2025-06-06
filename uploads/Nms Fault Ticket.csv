@@ -1,0 +1,29 @@
+DATE,OPEN TICKET, TICKET OPENED BY,CLOSED TICKET,TICKET CLOSED BY,PENDING TICKET,REMARKS
+12/30/2024,1.INC - 01861(13:08 pm),Dinesh,1.INC - 01861(20:12 pm),Dinesh,NO,Server down due to voltage outage issue.
+12/31/2024,1.INC - 01862(14:48 pm),Vinoth,-,-,1.INC - 01862(14:48 pm),Server down due mother board issue.
+01-06-2025,-,-,1.INC - 01862(20:51 pm),Vinoth,NO,Mother board replaced and Server up.
+01-07-2025,1. INC - 01863(2:59 pm),G.Mallikarjuna,1. INC - 01863(4:26 pm),G.Mallikarjuna,NO,In server(172.31.39.165) OS is not  booting due to control D error.
+01-08-2025,NA,NA,NA,NA,NA,NA
+01-09-2025,NA,NA,NA,NA,NA,NA
+01-10-2025,1.INC - 01865(5:23 pm),G.Mallikarjuna,1.01865(5:45 pm),G.Mallikarjuna,NO,Server(172.31.39.165) is not pinging due to NIC card error
+01-10-2025,1.INC -  01866(11:30 am)-Duplicate,Pallab,-,-,NO,Two tickets raised same incident one is conider as a duplicate.
+01-11-2025,1.INC -  01867(11:30 am),G.Mallikarjuna,1.INC -  01867(2:39 pm),G.Mallikarjuna,NO,In server(172.31.39.165)  PCI card getting temperature error.
+1/13/2025,1.INC -  01868(11:46 am),G.Mallikarjuna,1.INC -  01868(20:30 pm),G.Mallikarjuna,NO,"NIC car issue in server(172.31.39.165), NIC card replaced and server up.  "
+1/14/2025,NA,NA,NA,NA,NA,NA
+1/15/2025,1.INC - 01869(12:09 pm),G.Mallikarjuna,1.INC - 01869(13:22 pm),G.Mallikarjuna,NO,"IDRAC is not accessible, At 13:22 pm it is accessible & ticket is closed."
+1/16/2025,NA,NA,NA,NA,NA,NA
+1/17/2025,NA,NA,NA,NA,NA,NA
+1/18/2025,NA,NA,NA,NA,NA,NA
+1/20/2025,NA,NA,NA,NA,NA,NA
+1/21/2025,INC-01871 (11.39 AM),MALLIKAARJUNA,INC-01871 (12.20 PM),MALLIKAARJUNA,NO,P4 PORT IS DOWN BLR-SR-APP-MSN-02
+1/21/2025,INC-01872 ( 4.08 PM ),Dinesh,NO,-,-,NETWORK PORT ISSUE SERVER 172.31.39.165
+1/22/2025,NA,NA,NA,NA,NA,NA
+1/23/2025,INC-01877 ( 11.38 AM ),Dinesh,INC-01877 ( 1.09AM ),Dinesh,NO,NETWORK PORT ISSUE SERVER 172.31.39.185
+1/24/2025,NA,NA,NA,NA,NA,NA
+1/25/2025,NA,NA,NA,NA,NA,NA
+1/26/2025,NA,NA,NA,NA,NA,NA
+1/27/2025,NA,NA,NA,NA,NA,NA
+1/28/2025,INC-01879 (3:06 PM) / INC-01880 (3:06 PM),Dinesh,4:00 PM,Dinesh,NO,Hard Drive issue @ Slot 1 / DIMM Slot C5 Issue
+1/29/2025,NA,NA,NA,NA,NA,NA
+1/30/2025,NA,NA,NA,NA,NA,NA
+1/31/2025,NA,NA,NA,NA,NA,NA
