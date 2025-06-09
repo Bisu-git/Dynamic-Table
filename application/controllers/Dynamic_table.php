@@ -66,15 +66,7 @@ class Dynamic_table extends CI_Controller {
     }
 
 
-    public function get_row_data() {
-        $id = $this->input->post('id');
-        $table = $this->input->post('table');
-
-        $columns = $this->Schema_model->get_column_names($table);
-        $row = $this->Schema_model->get_row_by_id($table, $id);
-
-        echo json_encode(['columns' => $columns, 'row' => $row]);
-    }
+    
 
     public function update_row() {
         $table = $this->input->post('table');
@@ -104,11 +96,25 @@ class Dynamic_table extends CI_Controller {
         echo "success";
     }
 
+    public function get_row_data() {
+        $id = $this->input->post('id');
+        $table = $this->input->post('table');
+
+        $columns = $this->Schema_model->get_column_names($table);
+        $row = $this->Schema_model->get_row_by_id($table, $id);
+        // echo '<pre>';
+        // print_r($columns);
+        // print_r($row);
+        // die('Hii');
+
+        echo json_encode(['columns' => $columns, 'row' => $row]);
+    }
+
     public function create_add_input_modal()
     {
         $table = $this->input->post('table');
         $columns = $this->Schema_model->get_table_columns($table);
-        // echo '<pre>';print_r($columns);die('Hii');
+        echo '<pre>';print_r($columns);die('Hii');
 
         $html = '';
         foreach ($columns as $col) {

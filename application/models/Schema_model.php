@@ -119,10 +119,17 @@ class Schema_model extends CI_Model {
 
 
     /////////////////// Dynamic Add And Edit //////////////////////
+    // public function get_column_names($table) {
+        
+    //     $query = $this->db->query("SHOW COLUMNS FROM `$table`");
+    //     return array_column($query->result_array(), 'Field');
+    // }
+
     public function get_column_names($table) {
-        $query = $this->db->query("SHOW COLUMNS FROM `$table`");
-        return array_column($query->result_array(), 'Field');
+        $query = $this->db->query("SHOW FULL COLUMNS FROM `$table`");
+        return $query->result(); 
     }
+
 
     public function get_row_by_id($table, $id) {
         return $this->db->get_where($table, ['id' => $id])->row_array();

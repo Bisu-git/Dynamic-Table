@@ -118,30 +118,41 @@ $('#fetch_table').click(function () {
     });
 });
 
-
-// Edit button click
-$(document).on('click', '.edit-btn', function () {
-    const rowId = $(this).data('id');
-    const tableName = $(this).data('table');
-
-    $.post('<?php echo site_url('Dynamic_table/get_row_data'); ?>', { id: rowId, table: tableName }, function (res) {
-        $('#modal-body-fields').empty();
-        res.columns.forEach(col => {
-            if (col !== 'id') {
-                $('#modal-body-fields').append(`
-                    <div class="mb-3">
-                        <label class="form-label">${col}</label>
-                        <input type="text" id="${col}" oninput="calculate_val()" class="form-control" name="${col}" value="${res.row[col] || ''}">
-                    </div>
-                `);
-            }
-        });
-        $('#editForm').attr('data-id', rowId).attr('data-table', tableName);
-        new bootstrap.Modal(document.getElementById('editModal')).show();
-    }, 'json');
-});
-
 // Submit Edit
+    $(document).on('click', '.edit-btn', function () {
+        const rowId = $(this).data('id');
+        const tableName = $(this).data('table');
+
+        $.post('<?php echo site_url('Dynamic_table/get_row_data'); ?>', { id: rowId, table: tableName }, function (res) {
+            $('#modal-body-fields').empty();
+            console.log(res);
+
+            res.columns.forEach(col => {
+                if (col.Field !== 'id') {
+                    const value = res.row[col.Field] || '';
+                    const isCalculated = col.Comment.startsWith("Calculated");
+
+                    $('#modal-body-fields').append(`
+                        <div class="mb-3">
+                            <label class="form-label">${col.Field}</label>
+                            <input type="text"
+                                class="form-control"
+                                id="${col.Field}"
+                                name="${col.Field}"
+                                value="${value}"
+                                ${isCalculated ? "readonly data-calculated='true' data-expression=\"" + col.Comment + "\"" : ""}
+                                oninput="calculate_val()">
+                        </div>
+                    `);
+                }
+            });
+
+            $('#editForm').attr('data-id', rowId).attr('data-table', tableName);
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+            calculate_val(); // Recalculate on open
+        }, 'json');
+    });
+
 $('#editForm').submit(function (e) {
     e.preventDefault();
     const table = $(this).attr('data-table');
@@ -154,6 +165,7 @@ $('#editForm').submit(function (e) {
         $('#fetch_table').click();
     });
 });
+
 
 // Add button logic
 $(document).on('click', '[data-bs-target="#addGpModal"]', function () {
@@ -214,35 +226,43 @@ $(document).ready(function () {
 //     let Tax = document.getElementById("Tax").value;
 //     let total = document.getElementById("total");
 
-//     total.value = basic * 10 + parseFloat(basic);
+//     let sum = basic + medical + house + conveyance + insurance ;
+//     document.getElementById("total").value = sum.toFixed(2);
+
+//      let sum = basic + medical + house + conveyance + insurance ;
+//     document.getElementById("total").value = sum.toFixed(2);
+//     let takeHome = grandTotal - gratuity;
+//     document.getElementById("TAKE_HOME_SALARY").value = takeHome.toFixed(2);
 // }
 
 
     function calculate_val() {
-        // Get all input values and parse them as floats
-        let basic = parseFloat(document.getElementById("Basic_Salary").value) || 0;
-        let medical = parseFloat(document.getElementById("Madical_Allowance").value) || 0;
-        let house = parseFloat(document.getElementById("House_Rent").value) || 0;
-        let conveyance = parseFloat(document.getElementById("Conveyance_Allowance").value) || 0;
-        let insurance = parseFloat(document.getElementById("INSURANCE").value) || 0;
-        let gratuity = parseFloat(document.getElementById("GRATUITY").value) || 0;
-        let tax = parseFloat(document.getElementById("Tax").value) || 0;
+        const inputs = document.querySelectorAll("input[data-calculated]");
+        inputs.forEach(input => {
+            let expression = input.getAttribute("data-expression");
 
-        // Calculate total (you can subtract tax if needed)
-        let sum = basic + medical + house + conveyance + insurance ;
-        // Set the total
-        document.getElementById("total").value = sum.toFixed(2); // Rounded to 2 decimal places
+            if (expression.startsWith("Calculated")) {
+                let rawExpr = expression.match(/\((.*?)\)/);
+                if (!rawExpr) return;
 
-        // let Grandtotal = document.getElementById("Grand_total");
+                let expr = rawExpr[1];
 
-        let taxPercentage = tax;
-        let grandTotal = sum - (sum * taxPercentage / 100);
-        document.getElementById("Grand_total").value = grandTotal.toFixed(2);
+                // Replace 'Field' with current input values
+                let evaluatedExpr = expr.replace(/'([^']+)'/g, (_, fieldName) => {
+                    let fieldInput = document.getElementById(fieldName);
+                    return fieldInput ? parseFloat(fieldInput.value) || 0 : 0;
+                });
 
-        // Step 3: Calculate Take Home = Grand Total - Gratuity
-        let takeHome = grandTotal - gratuity;
-        document.getElementById("TAKE_HOME_SALARY").value = takeHome.toFixed(2);
+                try {
+                    let result = eval(evaluatedExpr);
+                    input.value = result.toFixed(2);
+                } catch {
+                    input.value = 'Error';
+                }
+            }
+        });
     }
+
 
     function calculate_values() {
         // Get all inputs

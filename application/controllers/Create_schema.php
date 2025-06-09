@@ -23,7 +23,6 @@ class Create_schema extends CI_Controller
         // echo "<pre>";
         // print_r($columns);
         // die('hii');
-
         $result = $this->Schema_model->createDynamicTable($table_name, $columns);
 
         if ($result) {
