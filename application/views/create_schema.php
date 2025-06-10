@@ -70,6 +70,7 @@
   </div>
 </div>
 
+<?php include APPPATH . 'views/include/footer.php'; ?>
 <script>
 let currentCommentIndex = null;
 let expressionParts = [];
@@ -143,19 +144,51 @@ $(document).ready(function () {
     });
 
 
-    // Add expression part
-    $('#addLine').click(function () {
-        const operator = $('#operator').val();
-        const field = $('#fieldSelector').val();
+            // Add expression part
+        let expressionParts = [];
+        // Add expression part
+        $('#addLine').click(function () {
+            const operator = $('#operator').val();
+            const field = $('#fieldSelector').val();
 
-        if (expressionParts.length === 0) {
-            expressionParts.push(`'${field}'`);
-        } else {
-            expressionParts.push(` ${operator} '${field}'`);
-        }
+            // Create expression part (for both tracking and display)
+            const part = expressionParts.length === 0 ? `'${field}'` : `${operator} '${field}'`;
 
-        $('#expressionPreview').text(expressionParts.join(''));
-    });
+            // Save into array
+            expressionParts.push(part);
+
+            // Display with a remove button and index tracking
+            $('#expressionPreview').append(`
+                <div class="d-inline-block me-2 mb-2 part-item" data-index="${expressionParts.length - 1}">
+                    ${part}
+                    <button type="button" class="btn btn-sm btn-danger ms-1 remove" aria-label="Close">&times;</button>
+                </div>
+            `);
+
+            // Update hidden input or live preview if needed
+            $('#hiddenExpression').val(expressionParts.join(' '));
+        });
+        $(document).on("click", ".remove", function () {
+            const parentDiv = $(this).closest('.part-item');
+            const index = parseInt(parentDiv.data('index'));
+
+            // Remove from array using index
+            expressionParts.splice(index, 1);
+
+            // Re-render all parts with updated indexes
+            $('#expressionPreview').empty();
+            expressionParts.forEach((part, i) => {
+                $('#expressionPreview').append(`
+                    <div class="d-inline-block me-2 mb-2 part-item" data-index="${i}">
+                        ${part}
+                        <button type="button" class="btn btn-sm btn-danger ms-1 remove" aria-label="Close">&times;</button>
+                    </div>
+                `);
+            });
+
+            // Update hidden input or preview
+            $('#hiddenExpression').val(expressionParts.join(' '));
+        });
 
     // Finalize expression
     $('#finalizeCalc').click(function () {

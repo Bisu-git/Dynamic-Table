@@ -48,4 +48,35 @@ class Login extends CI_Controller
         return redirect('Login');
     }
 
+    public function register_user()
+    {
+        $this->load->view('resister_user');
+    }
+
+
+    public function registerUser() {
+        $data = $this->input->post();
+
+        // Simple validation (you can expand it later)
+        if ($data['userPassword'] !== $data['confirmPassword']) {
+            $this->session->set_flashdata('messages', 'Passwords do not match');
+            redirect('AuthController/showRegister');
+            return;
+        }
+        $userData = [
+            'firstName'     => $data['firstName'],
+            'lastName'      => $data['lastName'],
+            'emailId'          => $data['emailId'],
+            'mobileNumber'         => $data['mobileNumber'],
+            // 'userPassword'       => password_hash($data['userPassword'], PASSWORD_DEFAULT),
+            'userPassword'       => $data['userPassword'],
+            'isActive'      => 1,
+            'lastUpdationDate'     => date('Y-m-d H:i:s')
+        ];
+
+        $this->Home_model->insert_user($userData);
+        $this->session->set_flashdata('messages', 'Registration successful!');
+        redirect('Login/register_user');
+    }
+
 }

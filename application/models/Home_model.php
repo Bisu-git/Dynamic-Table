@@ -230,16 +230,21 @@ class Home_model extends CI_Model
         return $this->db->get('vender_salary')->result(); // Replace 'gp_table' with your actual table name
     }
 
-public function manual_columns()
-{
-    $sql = "SELECT COLUMN_NAME
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = 'vender_salary'
-              AND TABLE_SCHEMA = DATABASE()
-              AND COLUMN_COMMENT = 'Manual'";
-    
-    return $this->db->query($sql)->result();
-}
+    public function manual_columns()
+    {
+        $sql = "SELECT COLUMN_NAME
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = 'vender_salary'
+                AND TABLE_SCHEMA = DATABASE()
+                AND COLUMN_COMMENT = 'Manual'";
+        
+        return $this->db->query($sql)->result();
+    }
+
+
+    public function insert_user($data) {
+            return $this->db->insert('tblusers', $data);
+    }
 
 
 

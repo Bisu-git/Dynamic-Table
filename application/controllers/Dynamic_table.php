@@ -114,7 +114,7 @@ class Dynamic_table extends CI_Controller {
     {
         $table = $this->input->post('table');
         $columns = $this->Schema_model->get_table_columns($table);
-        echo '<pre>';print_r($columns);die('Hii');
+        // echo '<pre>';print_r($columns);die('Hii');
 
         $html = '';
         foreach ($columns as $col) {

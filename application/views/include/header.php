@@ -6,9 +6,9 @@
     <a href="<?php echo site_url('Edit_schema'); ?>">Edit Table</a>
     <a href="<?php echo site_url('Home/csv_view'); ?>">Csv to Sql</a>
     <a href="<?php echo site_url('Dynamic_table'); ?>">Dynamic Table</a>
+    <a class="d-none" href="<?php echo site_url('Home/dynamics_input'); ?>">Dynamic Details</a>
+    <a href="<?php echo site_url('Login/register_user'); ?>">Register Details</a>
     <a href="<?php echo site_url('Login/logout'); ?>">Log Out</a>
-    <a href="<?php echo site_url('Home/dynamics_input'); ?>">Dynamic Details</a>
-    <a class="d-none" href="<?php echo site_url('Dynamic_table/logins'); ?>">Log in</a>
   </nav>
 </div>
 
