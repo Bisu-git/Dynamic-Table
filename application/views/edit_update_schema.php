@@ -52,91 +52,202 @@
     </div>
 </div>
 
+<!-- Modal for calculated expression -->
+<div class="modal fade" id="calcModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content p-3">
+        <div>
+            <label>Operation:</label>
+            <select class="form-select mb-2" id="operator">
+                <option value="+">+</option>
+                <option value="-">-</option>
+                <option value="*">*</option>
+                <option value="/">/</option>
+            </select>
+
+            <label>Column:</label>
+            <select class="form-select mb-2" id="fieldSelector">
+                <!-- dynamic -->
+            </select>
+
+            <button type="button" class="btn btn-sm btn-outline-success mb-2" id="addLine">➕ Add</button>
+            <div id="expressionPreview" class="text-primary mb-2 fw-bold small"></div>
+            <button type="button" class="btn btn-sm btn-primary" id="finalizeCalc">Done</button>
+        </div>
+    </div>
+  </div>
+</div>
+
 <?php include APPPATH . 'views/include/footer.php'; ?>
 
 <script>
-$(document).ready(function() {
-    $('#action_type, #all_tables').on('change', function() {
-        let table = $('#all_tables').val();
-        let action = $('#action_type').val();
-        $('#dynamic_section').empty();
+let allFields = [];
+let currentIndex = null;
+let expression = [];
 
-        if (table && action) {
-            $.ajax({
-                url: "<?= site_url('Edit_schema/get_columns') ?>",
-                type: "POST",
-                data: { table_name: table },
-                success: function(response) {
-                    let columns = JSON.parse(response);
-                    let html = '';
+// After selecting table and action
+$('#action_type, #all_tables').on('change', function () {
+    let table = $('#all_tables').val();
+    let action = $('#action_type').val();
+    $('#dynamic_section').empty();
 
-                    if (action === 'edit') {
-                        html += `<div class="mb-3">
-                            <label>Select Column to Edit:</label>
-                            <select name="column_name" class="form-select">`;
-                        columns.forEach(col => {
-                            html += `<option value="${col.Field}">${col.Field}</option>`;
-                        });
-                        html += `</select></div>`;
+    if (table && action) {
+        $.ajax({
+            url: "<?= site_url('Edit_schema/get_columns') ?>",
+            type: "POST",
+            data: { table_name: table },
+            success: function (response) {
+                let columns = JSON.parse(response);
+                allFields = columns.map(col => col.Field); // ✅ Store for later
+                let html = '';
 
-                        html += `
-                            <div class="mb-3">
-                                <label>New Column Name:</label>
-                                <input type="text" name="new_column_name" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label>New Data Type:</label>
-                                <select name="new_column_type" class="form-select">
-                                    <option value="VARCHAR(255)">VARCHAR</option>
-                                    <option value="INT">INT</option>
-                                    <option value="TEXT">TEXT</option>
-                                    <option value="DATE">DATE</option>
-                                    <option value="DATETIME">DATETIME</option>
-                                    <option value="FLOAT">FLOAT</option>
-                                </select>
-                            </div>`;
-                    } else if (action === 'delete') {
-                        html += `<div class="mb-3">
-                            <label>Select Column to Delete:</label>
-                            <select name="column_name" class="form-select">`;
-                        columns.forEach(col => {
-                            html += `<option value="${col.Field}">${col.Field}</option>`;
-                        });
-                        html += `</select></div>`;
-                    } else if (action === 'add') {
-                        html += `<div class="mb-3">
-                            <label>Select Column to Insert After:</label>
-                            <select name="after_column" class="form-select">`;
-                        columns.forEach(col => {
-                            html += `<option value="${col.Field}">${col.Field}</option>`;
-                        });
-                        html += `</select></div>`;
+                if (action === 'edit') {
+                    html += `<div class="mb-3">
+                        <label>Select Column to Edit:</label>
+                        <select name="column_name" class="form-select">
+                        <option value="">-- Select Column --</option>
+                        `;
+                    columns.forEach(col => {
+                        html += `<option value="${col.Field}">${col.Field}</option>`;
+                    });
+                    html += `</select></div>`;
 
-                        html += `
-                            <div class="mb-3">
-                                <label>New Column Name:</label>
-                                <input type="text" name="new_column_name" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label>Data Type:</label>
-                                <select name="new_column_type" class="form-select">
-                                    <option value="VARCHAR(255)">VARCHAR</option>
-                                    <option value="INT">INT</option>
-                                    <option value="TEXT">TEXT</option>
-                                    <option value="DATE">DATE</option>
-                                    <option value="DATETIME">DATETIME</option>
-                                    <option value="FLOAT">FLOAT</option>
-                                </select>
-                            </div>`;
-                    }
-
-                    $('#dynamic_section').html(html);
+                    html += `<div class="row">
+                        <div class="col-md-4">
+                            <label>New Column Name:</label>
+                            <input type="text" name="new_column_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>New Data Type:</label>
+                            <select name="new_column_type" class="form-select">
+                                <option value="VARCHAR(255)">VARCHAR</option>
+                                <option value="INT">INT</option>
+                                <option value="TEXT">TEXT</option>
+                                <option value="DATE">DATE</option>
+                                <option value="DATETIME">DATETIME</option>
+                                <option value="FLOAT">FLOAT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Comment:</label>
+                            <select name="columns[0][comment_type]" class="form-select comment-select" data-index="0">
+                                <option value="">None</option>
+                                <option value="Manual">Manual</option>
+                                <option value="Calculated">Calculated</option>
+                            </select>
+                            <input type="hidden" class="calc-comment" name="columns[0][comment]" value="">
+                        </div>
+                    </div>`;
                 }
-            });
+
+                if (action === 'add') {
+                    html += `<div class="mb-3">
+                        <label>Select Column to Insert After:</label>
+                        <select name="after_column" class="form-select">
+                        <option value="">-- Select Column --</option>
+                        `;
+                    columns.forEach(col => {
+                        html += `<option value="${col.Field}">${col.Field}</option>`;
+                    });
+                    html += `</select></div>`;
+
+                    html += `<div class="row">
+                        <div class="col-md-4">
+                            <label>New Column Name:</label>
+                            <input type="text" name="new_column_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Data Type:</label>
+                            <select name="new_column_type" class="form-select">
+                                <option value="VARCHAR(255)">VARCHAR</option>
+                                <option value="INT">INT</option>
+                                <option value="TEXT">TEXT</option>
+                                <option value="DATE">DATE</option>
+                                <option value="DATETIME">DATETIME</option>
+                                <option value="FLOAT">FLOAT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Comment:</label>
+                            <select name="columns[0][comment_type]" class="form-select comment-select" data-index="0">
+                                <option value="">None</option>
+                                <option value="Manual">Manual</option>
+                                <option value="Calculated">Calculated</option>
+                            </select>
+                            <input type="hidden" class="calc-comment" name="columns[0][comment]" value="">
+                        </div>
+                    </div>`;
+                }
+
+                if (action === 'delete') {
+                    html += `<div class="mb-3">
+                        <label>Select Column to Delete:</label>
+                        <select name="column_name" class="form-select">
+                        <option value="">-- Select Column --</option>
+                        `;
+                    columns.forEach(col => {
+                        html += `<option value="${col.Field}">${col.Field}</option>`;
+                    });
+                    html += `</select></div>`;
+                }
+
+                $('#dynamic_section').html(html);
+            }
+        });
+    }
+});
+
+// When comment type is Calculated, open modal
+$(document).on('change', '.comment-select', function () {
+    const selected = $(this).val();
+    currentIndex = $(this).data('index');
+
+    if (selected === 'Calculated') {
+        let options = '';
+        allFields.forEach(col => {
+            options += `<option value="${col}">${col}</option>`;
+        });
+        $('#fieldSelector').html(options);
+        $('#expressionPreview').text('');
+        expression = [];
+        $('#calcModal').modal('show');
+    } else if (selected === 'Manual') {
+        // ✅ Directly assign "Manual" to hidden comment field
+        $(`input[name="columns[${currentIndex}][comment]"]`).val("Manual");
+    } else {
+        // If None selected, clear it
+        $(`input[name="columns[${currentIndex}][comment]"]`).val("");
+    }
+});
+
+// Add operation and field to expression
+$('#addLine').on('click', function () {
+    const field = $('#fieldSelector').val();
+    const operator = $('#operator').val();
+    if (field) {
+        if (expression.length === 0) {
+            expression.push(`'${field}'`);
+        } else {
+            expression.push(operator, `'${field}'`);
         }
-    });
+        $('#expressionPreview').text(expression.join(' '));
+    }
+});
+
+// Finalize calculated expression and inject into hidden field
+$('#finalizeCalc').on('click', function () {
+    const finalExpression = `Calculated (${expression.join(' ')})`;
+    $(`input[name="columns[${currentIndex}][comment]"]`).val(finalExpression);
+    $('#calcModal').modal('hide');
+});
+
+// Reset modal on close
+$('#calcModal').on('hidden.bs.modal', function () {
+    expression = [];
+    $('#expressionPreview').text('');
 });
 </script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

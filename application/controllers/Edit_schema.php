@@ -24,6 +24,7 @@ class Edit_schema extends CI_Controller
     {
         $table_name = $this->input->post('table_name');
         $columns = $this->Schema_model->get_columns($table_name);
+        // echo '<pre>';print_r($columns);die('hii');
         echo json_encode($columns);
     }
 

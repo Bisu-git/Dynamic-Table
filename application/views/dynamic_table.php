@@ -15,10 +15,10 @@
         background-color: #e9ecef;
         }
 
-        body {
+        /* body {
         background: linear-gradient(to right, #4facfe, #00f2fe);
         min-height: 100vh;
-        }
+        } */
 
     </style>
 

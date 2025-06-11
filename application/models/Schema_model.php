@@ -33,7 +33,7 @@ class Schema_model extends CI_Model {
 
         // Loop through each column
         foreach ($columns as $col) {
-            $col_name = str_replace('>', 'Greater_', $col['name']);
+            $col_name = str_replace('%', '_Percent_', $col['name']);
             $col_name = str_replace(' ', '_', $col_name);
             $col_name = preg_replace('/[^a-zA-Z0-9_]/', '', $col_name);
 
@@ -68,29 +68,36 @@ class Schema_model extends CI_Model {
     }
 
     public function get_columns($table_name) {
-        return $this->db->query("SHOW COLUMNS FROM `$table_name`")->result_array();
+        return $this->db->query("SHOW FULL COLUMNS FROM `$table_name`")->result_array();
     }
 
     public function alter_table($data) {
         $table = $data['table_name'];
+        $action = $data['action_type'];
 
+        // Sanitize new column name
         if (isset($data['new_column_name'])) {
             $data['new_column_name'] = preg_replace('/[^A-Za-z0-9]+/', '_', trim($data['new_column_name']));
         }
 
-        if ($data['action_type'] === 'edit') {
-            $sql = "ALTER TABLE `$table` CHANGE `{$data['column_name']}` `{$data['new_column_name']}` {$data['new_column_type']}";
-        } elseif ($data['action_type'] === 'delete') {
+        // Default to empty comment
+        $comment = '';
+        if (!empty($data['columns'][0]['comment'])) {
+            $comment = addslashes($data['columns'][0]['comment']); // escape quotes
+        }
+
+        $sql = "";
+
+        if ($action === 'edit') {
+            $sql = "ALTER TABLE `$table` CHANGE `{$data['column_name']}` `{$data['new_column_name']}` {$data['new_column_type']} COMMENT '$comment'";
+        } elseif ($action === 'delete') {
             $sql = "ALTER TABLE `$table` DROP COLUMN `{$data['column_name']}`";
-        } elseif ($data['action_type'] === 'add') {
-            $sql = "ALTER TABLE `$table` ADD `{$data['new_column_name']}` {$data['new_column_type']} AFTER `{$data['after_column']}`";
+        } elseif ($action === 'add') {
+            $sql = "ALTER TABLE `$table` ADD `{$data['new_column_name']}` {$data['new_column_type']} COMMENT '$comment' AFTER `{$data['after_column']}`";
         }
 
         return $this->db->query($sql);
     }
-
-
-
 
 
     // public function get_table_columns($table) {

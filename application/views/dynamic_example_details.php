@@ -176,10 +176,7 @@ $(document).ready(function(){
     let column = popup.find(".column").val();
     // console.log(column);
     let columnText = popup.find(".column option:selected").text();
-    console.log(popup);
-    console.log(operand);
-    console.log(column);
-    console.log(columnText);
+
 
 
     popup.find(".operation-list").append(`
