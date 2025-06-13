@@ -70,6 +70,11 @@
                 <!-- dynamic -->
             </select>
 
+            <label>
+                % Formula:
+            </label>
+            <input type="text" id="formula_dynamic" name="formula_dynamic" class="">
+
             <button type="button" class="btn btn-sm btn-outline-success mb-2" id="addLine">➕ Add</button>
             <div id="expressionPreview" class="text-primary mb-2 fw-bold small"></div>
             <button type="button" class="btn btn-sm btn-primary" id="finalizeCalc">Done</button>
@@ -204,6 +209,7 @@ $(document).on('change', '.comment-select', function () {
 
     if (selected === 'Calculated') {
         let options = '';
+        options += `<option value="">None</option>`;
         allFields.forEach(col => {
             options += `<option value="${col}">${col}</option>`;
         });
@@ -221,25 +227,72 @@ $(document).on('change', '.comment-select', function () {
 });
 
 // Add operation and field to expression
+let expressionParts = [];
+
 $('#addLine').on('click', function () {
-    const field = $('#fieldSelector').val();
+    const field = $('#fieldSelector').val().trim();
     const operator = $('#operator').val();
-    if (field) {
-        if (expression.length === 0) {
-            expression.push(`'${field}'`);
-        } else {
-            expression.push(operator, `'${field}'`);
-        }
-        $('#expressionPreview').text(expression.join(' '));
+    const customFormula = $('#formula_dynamic').val().trim();
+    console.log(`Field: ${field}, Operator: ${operator}, Custom Formula: ${customFormula}`);
+
+    let part = '';
+
+    // Case 1: Both field and custom formula are entered
+    if (field && customFormula) {
+        part = expressionParts.length === 0
+            ? `'${field}' ${operator} ${customFormula}`
+            : `${operator} '${field}' ${operator} ${customFormula}`;
     }
+
+    // Case 2: Only field selected
+    else if (field) {
+        part = expressionParts.length === 0
+            ? `'${field}'`
+            : `${operator} '${field}'`;
+    }
+
+    // Case 3: Only custom formula written
+    else if (customFormula) {
+        part = expressionParts.length === 0
+            ? `${customFormula}`
+            : `${operator} ${customFormula}`;
+    }
+
+    // Case 4: Nothing entered
+    else {
+        alert("Please select a column or enter a formula.");
+        return;
+    }
+
+    // Add part to the array
+    expressionParts.push(part);
+
+    // Display expression preview
+    $('#expressionPreview').text(expressionParts.join(' '));
+
+    // Clear inputs
+    $('#fieldSelector').val('');
+    $('#operator').val('+');
+    $('#formula_dynamic').val('');
 });
 
+
 // Finalize calculated expression and inject into hidden field
+// $('#finalizeCalc').on('click', function () {
+//     const finalExpression = `Calculated (${expression.join(' ')})`;
+//     $(`input[name="columns[${currentIndex}][comment]"]`).val(finalExpression);
+//     $('#calcModal').modal('hide');
+// });
+
 $('#finalizeCalc').on('click', function () {
-    const finalExpression = `Calculated (${expression.join(' ')})`;
+    const finalExpression = `Calculated (${expressionParts.join(' ')})`;
     $(`input[name="columns[${currentIndex}][comment]"]`).val(finalExpression);
+    // Reset
+    expressionParts = [];
+    $('#expressionPreview').text('');
     $('#calcModal').modal('hide');
 });
+
 
 // Reset modal on close
 $('#calcModal').on('hidden.bs.modal', function () {

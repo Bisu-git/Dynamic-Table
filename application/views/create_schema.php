@@ -62,6 +62,16 @@
                 <!-- dynamic -->
             </select>
 
+            <!-- <label>Instructions: <div> ('Basic' * (1 + 'Gst' / 100) ) <div></label> -->
+            <label>
+                % Formula:
+                <span style="color: red;">
+                    ('Basic' * (1 + 'Gst' / 100))
+                </span>
+            </label>
+
+            <input type="text" id="formula_dynamic" name="formula_dynamic" class="">
+
             <button type="button" class="btn btn-sm btn-outline-success mb-2" id="addLine">➕ Add</button>
             <div id="expressionPreview" class="text-primary mb-2 fw-bold small"></div>
             <button type="button" class="btn btn-sm btn-primary" id="finalizeCalc">Done</button>
@@ -129,6 +139,7 @@ $(document).ready(function () {
             });
 
             $('#fieldSelector').empty();
+            $('#fieldSelector').append(`<option value="">None</option>`);
             fields.forEach(f => {
                 const value = f.replace(/\s+/g, '_'); // Safe for expressions
                 const label = f.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); // User-friendly
@@ -139,7 +150,7 @@ $(document).ready(function () {
             $('#calcModal').modal('show');
         } else {
             // ✅ Fix: update the comment hidden field for Manual or None
-            commentField.val(val); // Will set to "Manual" or ""
+            commentField.val(val);
         }
     });
 
@@ -149,15 +160,33 @@ $(document).ready(function () {
         // Add expression part
         $('#addLine').click(function () {
             const operator = $('#operator').val();
-            const field = $('#fieldSelector').val();
+            const field = $('#fieldSelector').val().trim();
+            const customFormula = $('#formula_dynamic').val().trim();
 
-            // Create expression part (for both tracking and display)
-            const part = expressionParts.length === 0 ? `'${field}'` : `${operator} '${field}'`;
+            let part = '';
 
-            // Save into array
+            if (field && customFormula) {
+                // Case: both field and input value
+                part = expressionParts.length === 0
+                    ? `'${field}' ${operator} ${customFormula}`
+                    : `${operator} '${field}' ${operator} ${customFormula}`;
+            } else if (field) {
+                // Case: only column selected
+                part = expressionParts.length === 0
+                    ? `'${field}'`
+                    : `${operator} '${field}'`;
+            } else if (customFormula) {
+                // Case: only value typed
+                part = expressionParts.length === 0
+                    ? `${customFormula}`
+                    : `${operator} ${customFormula}`;
+            } else {
+                alert("Please select a column or enter a value.");
+                return;
+            }
+
+            // Push and render
             expressionParts.push(part);
-
-            // Display with a remove button and index tracking
             $('#expressionPreview').append(`
                 <div class="d-inline-block me-2 mb-2 part-item" data-index="${expressionParts.length - 1}">
                     ${part}
@@ -165,9 +194,17 @@ $(document).ready(function () {
                 </div>
             `);
 
-            // Update hidden input or live preview if needed
+            // Update combined expression
             $('#hiddenExpression').val(expressionParts.join(' '));
+
+            // Optional: clear the manual input only
+            $('#formula_dynamic').val('');
+            $('#fieldSelector').val('');
         });
+
+
+
+
         $(document).on("click", ".remove", function () {
             const parentDiv = $(this).closest('.part-item');
             const index = parseInt(parentDiv.data('index'));

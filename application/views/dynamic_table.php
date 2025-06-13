@@ -15,6 +15,11 @@
         background-color: #e9ecef;
         }
 
+        .filter-section .form-label {
+            font-weight: 600;
+        }
+
+
         /* body {
         background: linear-gradient(to right, #4facfe, #00f2fe);
         min-height: 100vh;
@@ -32,6 +37,24 @@
 
 <?php include APPPATH . 'views/include/header.php'; ?>
 
+<!-- Filter Section - Fixed -->
+<div class="container mt-4">
+  <div class="row align-items-end mb-4">
+    <div class="col-md-3">
+      <label for="gp_details" class="form-label">Column:</label>
+      <select id="gp_details" class="form-select">
+        <option value="">Select Column</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="data" class="form-label">Value:</label>
+      <input type="text" id="data" placeholder="Enter value" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary w-100" style="margin-top: 30px;" onclick="applyFilter()">Submit</button>
+    </div>
+  </div>
+</div>
 
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -247,8 +270,8 @@ $(document).ready(function () {
             let expression = input.getAttribute("data-expression");
 
             if (expression.startsWith("Calculated")) {
-                let rawExpr = expression.match(/\((.*?)\)/);
-                if (!rawExpr) return;
+                let rawExpr = expression.match(/^Calculated\s*\((.*)\)$/);
+                if (!rawExpr || !rawExpr[1]) return;
 
                 let expr = rawExpr[1];
 
@@ -263,6 +286,7 @@ $(document).ready(function () {
                     input.value = result.toFixed(2);
                 } catch {
                     input.value = 'Error';
+                    console.error("Invalid expression:", evaluatedExpr);
                 }
             }
         });
@@ -270,20 +294,20 @@ $(document).ready(function () {
 
 
     function calculate_values() {
-        // Get all inputs
+        // Get all inputs with data-calculated
         const inputs = document.querySelectorAll("input[data-calculated]");
-        
+
         inputs.forEach(input => {
             let expression = input.getAttribute("data-expression");
 
             if (expression.startsWith("Calculated")) {
-                // Extract the part inside Calculated (...)
-                let rawExpr = expression.match(/\((.*?)\)/);
-                if (!rawExpr) return;
-                
+                // Extract everything inside Calculated(...)
+                let rawExpr = expression.match(/^Calculated\s*\((.*)\)$/);
+                if (!rawExpr || !rawExpr[1]) return;
+
                 let expr = rawExpr[1];
 
-                // Replace field names with their current values
+                // Replace 'FieldName' with value from input#FieldName
                 let evaluatedExpr = expr.replace(/'([^']+)'/g, (match, fieldName) => {
                     let fieldInput = document.getElementById(fieldName);
                     if (fieldInput) {
@@ -293,7 +317,7 @@ $(document).ready(function () {
                     return 0;
                 });
 
-                // Evaluate final value
+                // Try to evaluate the expression
                 try {
                     let result = eval(evaluatedExpr);
                     input.value = result.toFixed(2);
@@ -304,6 +328,7 @@ $(document).ready(function () {
             }
         });
     }
+
 
 
     

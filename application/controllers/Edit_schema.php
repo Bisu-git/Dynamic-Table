@@ -30,6 +30,7 @@ class Edit_schema extends CI_Controller
 
 public function processAction() {
     $data = $this->input->post();
+    // echo '<pre>';print_r($data);die('hii');
 
     $result = $this->Schema_model->alter_table($data);
 
